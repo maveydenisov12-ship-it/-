@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профессиональные услуги | Каталог услуг с онлайн-оплатой</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        /* Общие стили */
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #ff7e5f;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: #f5f7fa;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        h1, h2, h3, h4 {
+            margin-bottom: 20px;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+        }
+
+        .btn-accent:hover {
+            background-color: #ff6b4a;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background-color: var(--accent);
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        /* Шапка */
+        header {
+            background-color: white;
+            box-shadow: var(--shadow);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 30px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            transition: color 0.3s;
+            font-size: 16px;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* Герой секция */
+        .hero {
+            background: linear-gradient(135deg, rgba(74, 111, 165, 0.9) 0%, rgba(22, 96, 136, 0.9) 100%), url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 180px 0 100px;
+            margin-top: 70px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .hero p {
+            font-size: 20px;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+        }
+
+        /* Секция услуг */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .service-card {
+            background-color: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .service-img {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .service-content {
+            padding: 25px;
+        }
+
+        .service-content h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+
+        .service-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 15px 0;
+        }
+
+        .service-features {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .service-features li {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .service-features li:last-child {
+            border-bottom: none;
+        }
+
+        .service-features li i {
+            color: var(--success);
+            margin-right: 10px;
+        }
+
+        /* Секция о нас */
+        .about {
+            background-color: white;
+        }
+
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+
+        .about-text {
+            flex: 1;
+        }
+
+        .about-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .about-image {
+            flex: 1;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Секция оплаты */
+        .payment-container {
+            display: flex;
+            gap: 50px;
+            align-items: flex-start;
+            margin-top: 40px;
+        }
+
+        .payment-form-container {
+            flex: 1;
+            background-color: white;
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .selected-service {
+            flex: 1;
+            background-color: white;
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .card-element-container {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+
+        /* Футер */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 60px 0 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 3px;
+            background-color: var(--accent);
+            bottom: -10px;
+            left: 0;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 12px;
+        }
+
+        .footer-column ul li a {
+            color: #bbb;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column ul li a:hover {
+            color: white;
+        }
+
+        .contact-info li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .contact-info li i {
+            margin-right: 10px;
+            color: var(--accent);
+            margin-top: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            background-color: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close-modal:hover {
+            color: var(--dark);
+        }
+
+        .success-icon {
+            font-size: 60px;
+            color: var(--success);
+            margin-bottom: 20px;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 992px) {
+            .about-content, .payment-container {
+                flex-direction: column;
+            }
+            
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            }
+            
+            nav ul.active {
+                display: flex;
+            }
+            
+            nav ul li {
+                margin: 10px 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero {
+                padding: 150px 0 80px;
+            }
+            
+            .section-title {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 28px;
+            }
+            
+            .hero p {
+                font-size: 16px;
+            }
+            
+            .service-card {
+                margin-bottom: 20px;
+            }
+            
+            .about-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            section {
+                padding: 60px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка -->
+    <header>
+        <div class="header-container container">
+            <a href="#" class="logo">
+                <i class="fas fa-concierge-bell"></i>
+                ProServices
+            </a>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav>
+                <ul id="mainMenu">
+                    <li><a href="#home">Главная</a></li>
+                    <li><a href="#services">Услуги</a></li>
+                    <li><a href="#about">О нас</a></li>
+                    <li><a href="#payment">Оплата</a></li>
+                    <li><a href="#contact">Контакты</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Герой секция -->
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>Профессиональные услуги высокого качества</h1>
+            <p>Мы предлагаем широкий спектр услуг для вашего бизнеса и личных нужд. От веб-разработки до консультаций — все в одном месте с удобной онлайн-оплатой.</p>
+            <a href="#services" class="btn btn-accent">Выбрать услугу</a>
+        </div>
+    </section>
+
+    <!-- Секция услуг -->
+    <section id="services">
+        <div class="container">
+            <h2 class="section-title">Наши услуги</h2>
+            <p class="text-center" style="max-width: 800px; margin: 0 auto 30px;">Выберите из нашего каталога профессиональных услуг. Все услуги доступны для онлайн-заказа и мгновенной оплаты.</p>
+            
+            <div class="services-grid" id="servicesGrid">
+                <!-- Услуги будут загружены через JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Секция о нас -->
+    <section class="about" id="about">
+        <div class="container">
+            <h2 class="section-title">О нашей компании</h2>
+            
+            <div class="about-content">
+                <div class="about-text">
+                    <p>Мы — команда профессионалов, предоставляющая высококачественные услуги с 2010 года. Наша миссия — сделать профессиональные услуги доступными и удобными для каждого клиента.</p>
+                    <p>Используя современные технологии и проверенные методики, мы гарантируем результат, который превзойдет ваши ожидания. Более 5000 довольных клиентов по всему миру уже воспользовались нашими услугами.</p>
+                    
+                    <div class="about-stats">
+                        <div class="stat">
+                            <div class="stat-number">5000+</div>
+                            <div class="stat-label">Довольных клиентов</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">12+</div>
+                            <div class="stat-label">Лет опыта</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">50+</div>
+                            <div class="stat-label">Профессионалов</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" alt="Наша команда">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Секция оплаты -->
+    <section id="payment">
+        <div class="container">
+            <h2 class="section-title">Онлайн-оплата услуг</h2>
+            <p class="text-center" style="max-width: 800px; margin: 0 auto 30px;">Выберите услугу и заполните форму для безопасной онлайн-оплаты. Мы используем защищенное соединение и систему Stripe для обработки платежей.</p>
+            
+            <div class="payment-container">
+                <div class="selected-service">
+                    <h3>Выбранная услуга</h3>
+                    <div id="selectedServiceInfo">
+                        <p>Пожалуйста, выберите услугу из каталога.</p>
+                    </div>
+                </div>
+                
+                <div class="payment-form-container">
+                    <h3>Форма оплаты</h3>
+                    <form id="paymentForm">
+                        <div class="form-group">
+                            <label for="name">Ваше имя</label>
+                            <input type="text" id="name" class="form-control" placeholder="Иван Иванов" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Электронная почта</label>
+                            <input type="email" id="email" class="form-control" placeholder="ivan@example.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Данные карты</label>
+                            <div class="card-element-container">
+                                <div id="card-element"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="card-errors" role="alert" style="color: #dc3545; margin-bottom: 15px;"></div>
+                        
+                        <button type="submit" class="btn btn-accent" style="width: 100%;" id="submitBtn">
+                            <span id="buttonText">Оплатить</span>
+                            <span id="spinner" style="display: none;"><i class="fas fa-spinner fa-spin"></i></span>
+                        </button>
+                        
+                        <p style="font-size: 12px; margin-top: 15px; color: #666;">Оплачивая услугу, вы соглашаетесь с <a href="#">условиями предоставления услуг</a>. Все платежи защищены системой Stripe.</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>ProServices</h3>
+                    <p>Профессиональные услуги высокого качества с удобной онлайн-оплатой. Работаем с 2010 года.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Контакты</h3>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-map-marker-alt"></i> Москва, ул. Профессиональная, 15</li>
+                        <li><i class="fas fa-phone"></i> +7 (999) 123-45-67</li>
+                        <li><i class="fas fa-envelope"></i> info@proservices.ru</li>
+                        <li><i class="fas fa-clock"></i> Пн-Пт: 9:00-18:00</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Быстрые ссылки</h3>
+                    <ul>
+                        <li><a href="#home">Главная</a></li>
+                        <li><a href="#services">Услуги</a></li>
+                        <li><a href="#about">О нас</a></li>
+                        <li><a href="#payment">Оплата</a></li>
+                        <li><a href="#">Политика конфиденциальности</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 ProServices. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Модальное окно успешной оплаты -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Оплата прошла успешно!</h3>
+            <p id="successMessage">Ваша оплата была успешно обработана. Мы отправили детали заказа на вашу электронную почту.</p>
+            <p style="margin-top: 20px;"><strong>Номер заказа:</strong> <span id="orderId">PS-2023-</span></p>
+            <button class="btn" style="margin-top: 25px;" id="closeModalBtn">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        // Данные услуг
+        const services = [
+            {
+                id: 1,
+                name: "Разработка веб-сайта",
+                description: "Создание современного адаптивного веб-сайта с уникальным дизайном и полным функционалом.",
+                price: 29999,
+                image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80",
+                features: ["Адаптивный дизайн", "SEO-оптимизация", "Панель администратора", "Техническая поддержка 1 месяц"]
+            },
+            {
+                id: 2,
+                name: "Дизайн логотипа",
+                description: "Разработка уникального логотипа, который отражает суть вашего бренда и привлекает внимание.",
+                price: 14999,
+                image: "https://images.unsplash.com/photo-1634942537034-2531766767d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1722&q=80",
+                features: ["3 варианта дизайна", "Фирменный стиль", "Файлы всех форматов", "Правки до 3 раз"]
+            },
+            {
+                id: 3,
+                name: "Маркетинговая стратегия",
+                description: "Разработка комплексной маркетинговой стратегии для продвижения вашего бизнеса.",
+                price: 24999,
+                image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1715&q=80",
+                features: ["Анализ конкурентов", "Целевая аудитория", "Каналы продвижения", "План на 6 месяцев"]
+            },
+            {
+                id: 4,
+                name: "Консультация по бизнесу",
+                description: "Индивидуальная консультация с экспертом для решения ваших бизнес-задач.",
+                price: 8999,
+                image: "https://images.unsplash.com/photo-1551836026-d5c2c5af78e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
+                features: ["2 часа консультации", "Анализ текущей ситуации", "Рекомендации по развитию", "Ответы на вопросы"]
+            },
+            {
+                id: 5,
+                name: "SEO-оптимизация",
+                description: "Оптимизация сайта для поисковых систем для повышения видимости и привлечения трафика.",
+                price: 19999,
+                image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
+                features: ["Аудит сайта", "Ключевые слова", "Техническая оптимизация", "Отчетность"]
+            },
+            {
+                id: 6,
+                name: "Ведение социальных сетей",
+                description: "Полное ведение аккаунтов в социальных сетях: контент, публикации, взаимодействие с аудиторией.",
+                price: 17999,
+                image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1769&q=80",
+                features: ["Контент-план", "3 поста в день", "Аналитика", "Взаимодействие с аудиторией"]
+            }
+        ];
+
+        // Инициализация Stripe (публичный ключ для тестирования)
+        const stripe = Stripe('pk_test_51N4Xw0Kj4JX7v9o3Qy8gZ9wHJl5p6R8qVfYt7Uc9bD1aB2eF3g');
+        const elements = stripe.elements();
+        let cardElement;
+
+        // Текущая выбранная услуга
+        let selectedService = null;
+
+        // Загрузка DOM
+        document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация мобильного меню
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mainMenu = document.getElementById('mainMenu');
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                mainMenu.classList.toggle('active');
+            });
+
+            // Закрытие мобильного меню при клике на ссылку
+            const menuLinks = document.querySelectorAll('#mainMenu a');
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mainMenu.classList.remove('active');
+                });
+            });
+
+            // Загрузка услуг в каталог
+            loadServices();
+            
+            // Инициализация Stripe Elements
+            initializeStripe();
+            
+            // Обработка формы оплаты
+            const paymentForm = document.getElementById('paymentForm');
+            paymentForm.addEventListener('submit', handlePaymentSubmit);
+            
+            // Инициализация модального окна
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const closeModal = document.getElementById('closeModal');
+            const successModal = document.getElementById('successModal');
+            
+            closeModalBtn.addEventListener('click', function() {
+                successModal.style.display = 'none';
+            });
+            
+            closeModal.addEventListener('click', function() {
+                successModal.style.display = 'none';
+            });
+            
+            // Закрытие модального окна при клике вне его
+            window.addEventListener('click', function(event) {
+                if (event.target === successModal) {
+                    successModal.style.display = 'none';
+                }
+            });
+        });
+
+        // Загрузка услуг в каталог
+        function loadServices() {
+            const servicesGrid = document.getElementById('servicesGrid');
+            
+            services.forEach(service => {
+                const serviceCard = document.createElement('div');
+                serviceCard.className = 'service-card';
+                serviceCard.innerHTML = `
+                    <img src="${service.image}" alt="${service.name}" class="service-img">
+                    <div class="service-content">
+                        <h3>${service.name}</h3>
+                        <p>${service.description}</p>
+                        <ul class="service-features">
+                            ${service.features.map(feature => `<li><i class="fas fa-check"></i> ${feature}</li>`).join('')}
+                        </ul>
+                        <div class="service-price">${service.price.toLocaleString()} ₽</div>
+                        <button class="btn" onclick="selectService(${service.id})">Выбрать эту услугу</button>
+                    </div>
+                `;
+                
+                servicesGrid.appendChild(serviceCard);
+            });
+        }
+
+        // Выбор услуги
+        function selectService(serviceId) {
+            selectedService = services.find(service => service.id === serviceId);
+            
+            const selectedServiceInfo = document.getElementById('selectedServiceInfo');
+            selectedServiceInfo.innerHTML = `
+                <h4>${selectedService.name}</h4>
+                <p>${selectedService.description}</p>
+                <ul class="service-features">
+                    ${selectedService.features.map(feature => `<li><i class="fas fa-check"></i> ${feature}</li>`).join('')}
+                </ul>
+                <div class="service-price" style="font-size: 28px; margin-top: 20px;">${selectedService.price.toLocaleString()} ₽</div>
+            `;
+            
+            // Прокрутка к форме оплаты
+            document.getElementById('payment').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Инициализация Stripe Elements
+        function initializeStripe() {
+            const style = {
+                base: {
+                    color: '#32325d',
+                    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+                    fontSmoothing: 'antialiased',
+                    fontSize: '16px',
+                    '::placeholder': {
+                        color: '#aab7c4'
+                    }
+                },
+                invalid: {
+                    color: '#fa755a',
+                    iconColor: '#fa755a'
+                }
+            };
+            
+            cardElement = elements.create('card', { style: style });
+            cardElement.mount('#card-element');
+            
+            // Обработка ошибок карты
+            cardElement.addEventListener('change', function(event) {
+                const displayError = document.getElementById('card-errors');
+                if (event.error) {
+                    displayError.textContent = event.error.message;
+                } else {
+                    displayError.textContent = '';
+                }
+            });
+        }
+
+        // Обработка отправки формы оплаты
+        async function handlePaymentSubmit(event) {
+            event.preventDefault();
+            
+            // Проверка выбора услуги
+            if (!selectedService) {
+                alert('Пожалуйста, выберите услугу из каталога.');
+                document.getElementById('services').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+            
+            // Получение данных формы
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            
+            if (!name || !email) {
+                alert('Пожалуйста, заполните все обязательные поля.');
+                return;
+            }
+            
+            // Показать индикатор загрузки
+            const submitBtn = document.getElementById('submitBtn');
+            const buttonText = document.getElementById('buttonText');
+            const spinner = document.getElementById('spinner');
+            
+            buttonText.textContent = 'Обработка...';
+            spinner.style.display = 'inline-block';
+            submitBtn.disabled = true;
+            
+            try {
+                // Создание платежного метода
+                const { paymentMethod, error } = await stripe.createPaymentMethod({
+                    type: 'card',
+                    card: cardElement,
+                    billing_details: {
+                        name: name,
+                        email: email
+                    }
+                });
+                
+                if (error) {
+                    document.getElementById('card-errors').textContent = error.message;
+                    buttonText.textContent = 'Оплатить';
+                    spinner.style.display = 'none';
+                    submitBtn.disabled = false;
+                    return;
+                }
+                
+                // В реальном приложении здесь был бы запрос к вашему серверу
+                // для создания платежа и обработки его на стороне сервера
+                
+                // Имитация успешной оплаты
+                setTimeout(() => {
+                    // Генерация номера заказа
+                    const orderId = `PS-2023-${Math.floor(10000 + Math.random() * 90000)}`;
+                    
+                    // Обновление модального окна
+                    document.getElementById('orderId').textContent = orderId;
+                    document.getElementById('successMessage').textContent = 
+                        `Услуга "${selectedService.name}" успешно оплачена. Мы отправили детали заказа на ${email}.`;
+                    
+                    // Показать модальное окно
+                    document.getElementById('successModal').style.display = 'flex';
+                    
+                    // Сброс формы и состояния
+                    document.getElementById('paymentForm').reset();
+                    cardElement.clear();
+                    selectedService = null;
+                    document.getElementById('selectedServiceInfo').innerHTML = 
+                        '<p>Пожалуйста, выберите услугу из каталога.</p>';
+                    
+                    // Восстановление кнопки
+                    buttonText.textContent = 'Оплатить';
+                    spinner.style.display = 'none';
+                    submitBtn.disabled = false;
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при обработке платежа. Пожалуйста, попробуйте еще раз.');
+                
+                buttonText.textContent = 'Оплатить';
+                spinner.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
